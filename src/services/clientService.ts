@@ -58,10 +58,10 @@ export async function updateClientForUser(
   userId: string,
   clientId: string,
   data: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    status?: string;
+        name?: string;
+        email?: string | null;
+        phone?: string | null;
+        status?: "ACTIVE" | "INACTIVE";
   },
 ) {
   const user = await getUserById(userId);

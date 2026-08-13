@@ -1,7 +1,13 @@
 import { and, eq } from "drizzle-orm";
-
 import { db } from "../index";
 import { clients } from "../schema";
+
+type ClientUpdate = {
+  name?: string;
+  email?: string | null;
+  phone?: string | null;
+  status?: "ACTIVE" | "INACTIVE";
+};
 
 export async function createClient(
   firmId: string,
@@ -50,12 +56,7 @@ export async function getClientByIdForFirm(
 export async function updateClientForFirm(
   clientId: string,
   firmId: string,
-  data: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    status?: string;
-  },
+  data: ClientUpdate,
 ) {
   const [client] = await db
     .update(clients)

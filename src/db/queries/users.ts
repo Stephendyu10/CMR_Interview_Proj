@@ -6,7 +6,7 @@ export async function createUser(
   firmId: string,
   name: string,
   email: string,
-  role = "MEMBER",
+  role : "ADMIN" | "MEMBER" = "MEMBER",
 ) {
   const [user] = await db
     .insert(users)

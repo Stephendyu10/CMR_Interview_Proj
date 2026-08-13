@@ -1,12 +1,15 @@
 import { getUserById } from "../db/queries/users";
-import { getClientsByFirm } from "../db/queries/clients";
+
 import {
   createTask,
-  getTasksByEngagement,
-  updateTask,
-  deleteTask,
+  getTasksByEngagementForFirm,
+  getTaskByIdForFirm,
+  updateTaskForFirm,
+  deleteTaskForFirm,
+  type TaskUpdate,
 } from "../db/queries/tasks";
-import { getEngagementsByClient } from "../db/queries/engagements";
+
+import { getEngagementByIdForFirm } from "../db/queries/engagements";
 
 export async function createTaskForUser(
   userId: string,
@@ -24,23 +27,16 @@ export async function createTaskForUser(
     throw new Error("User not found");
   }
 
-  const clients = await getClientsByFirm(user.firmId);
-
-  const client = clients.find(
-    (client) => client.id === clientId,
-  );
-
-  if (!client) {
-    return null;
-  }
-
-  const engagements = await getEngagementsByClient(clientId);
-
-  const engagement = engagements.find(
-    (engagement) => engagement.id === engagementId,
+  const engagement = await getEngagementByIdForFirm(
+    engagementId,
+    user.firmId,
   );
 
   if (!engagement) {
+    return null;
+  }
+
+  if (engagement.clientId !== clientId) {
     return null;
   }
 
@@ -67,27 +63,23 @@ export async function getTasksForUser(
     throw new Error("User not found");
   }
 
-  const clients = await getClientsByFirm(user.firmId);
-
-  const client = clients.find(
-    (client) => client.id === clientId,
-  );
-
-  if (!client) {
-    return null;
-  }
-
-  const engagements = await getEngagementsByClient(clientId);
-
-  const engagement = engagements.find(
-    (engagement) => engagement.id === engagementId,
+  const engagement = await getEngagementByIdForFirm(
+    engagementId,
+    user.firmId,
   );
 
   if (!engagement) {
     return null;
   }
 
-  return getTasksByEngagement(engagementId);
+  if (engagement.clientId !== clientId) {
+    return null;
+  }
+
+  return getTasksByEngagementForFirm(
+    engagementId,
+    user.firmId,
+  );
 }
 
 export async function updateTaskForUser(
@@ -95,7 +87,7 @@ export async function updateTaskForUser(
   clientId: string,
   engagementId: string,
   taskId: string,
-  values: Parameters<typeof updateTask>[1],
+  values: TaskUpdate,
 ) {
   const user = await getUserById(userId);
 
@@ -103,37 +95,28 @@ export async function updateTaskForUser(
     throw new Error("User not found");
   }
 
-  const clients = await getClientsByFirm(user.firmId);
-
-  const client = clients.find(
-    (client) => client.id === clientId,
-  );
-
-  if (!client) {
-    return null;
-  }
-
-  const engagements = await getEngagementsByClient(clientId);
-
-  const engagement = engagements.find(
-    (engagement) => engagement.id === engagementId,
-  );
-
-  if (!engagement) {
-    return null;
-  }
-
-  const taskList = await getTasksByEngagement(engagementId);
-
-  const task = taskList.find(
-    (task) => task.id === taskId,
+  const task = await getTaskByIdForFirm(
+    taskId,
+    user.firmId,
   );
 
   if (!task) {
     return null;
   }
 
-  return updateTask(taskId, values);
+  if (task.clientId !== clientId) {
+    return null;
+  }
+
+  if (task.engagementId !== engagementId) {
+    return null;
+  }
+
+  return updateTaskForFirm(
+    taskId,
+    user.firmId,
+    values,
+  );
 }
 
 export async function deleteTaskForUser(
@@ -148,35 +131,25 @@ export async function deleteTaskForUser(
     throw new Error("User not found");
   }
 
-  const clients = await getClientsByFirm(user.firmId);
-
-  const client = clients.find(
-    (client) => client.id === clientId,
-  );
-
-  if (!client) {
-    return null;
-  }
-
-  const engagements = await getEngagementsByClient(clientId);
-
-  const engagement = engagements.find(
-    (engagement) => engagement.id === engagementId,
-  );
-
-  if (!engagement) {
-    return null;
-  }
-
-  const taskList = await getTasksByEngagement(engagementId);
-
-  const task = taskList.find(
-    (task) => task.id === taskId,
+  const task = await getTaskByIdForFirm(
+    taskId,
+    user.firmId,
   );
 
   if (!task) {
     return null;
   }
 
-  return deleteTask(taskId);
+  if (task.clientId !== clientId) {
+    return null;
+  }
+
+  if (task.engagementId !== engagementId) {
+    return null;
+  }
+
+  return deleteTaskForFirm(
+    taskId,
+    user.firmId,
+  );
 }

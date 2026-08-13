@@ -1,10 +1,13 @@
 import { getUserById } from "../db/queries/users";
-import { getClientsByFirm } from "../db/queries/clients";
+import { getClientByIdForFirm } from "../db/queries/clients";
+
 import {
-    createEngagement,
-    getEngagementsByClient,
-    updateEngagement,
-    deleteEngagement,
+  createEngagement,
+  getEngagementsByClientForFirm,
+  getEngagementByIdForFirm,
+  updateEngagementForFirm,
+  deleteEngagementForFirm,
+  type EngagementUpdate,
 } from "../db/queries/engagements";
 
 export async function createEngagementForUser(
@@ -20,17 +23,21 @@ export async function createEngagementForUser(
     throw new Error("User not found");
   }
 
-  const clients = await getClientsByFirm(user.firmId);
-
-  const clientBelongsToFirm = clients.some(
-    (client) => client.id === clientId,
+  const client = await getClientByIdForFirm(
+    clientId,
+    user.firmId,
   );
 
-  if (!clientBelongsToFirm) {
+  if (!client) {
     return null;
   }
 
-  return createEngagement(clientId, name, type, taxYear,);
+  return createEngagement(
+    clientId,
+    name,
+    type,
+    taxYear,
+  );
 }
 
 export async function getEngagementsForUser(
@@ -43,28 +50,17 @@ export async function getEngagementsForUser(
     throw new Error("User not found");
   }
 
-  const clients = await getClientsByFirm(user.firmId);
-
-  const clientBelongsToFirm = clients.some(
-    (client) => client.id === clientId,
+  return getEngagementsByClientForFirm(
+    clientId,
+    user.firmId,
   );
-
-  if (!clientBelongsToFirm) {
-        return null;
-  }
-
-  return getEngagementsByClient(clientId);
 }
+
 export async function updateEngagementForUser(
   userId: string,
   clientId: string,
   engagementId: string,
-  data: {
-    name?: string;
-    type?: string;
-    taxYear?: number;
-    status?: string;
-  },
+  data: EngagementUpdate,
 ) {
   const user = await getUserById(userId);
 
@@ -72,28 +68,26 @@ export async function updateEngagementForUser(
     throw new Error("User not found");
   }
 
-  const clients = await getClientsByFirm(user.firmId);
-
-  const clientBelongsToFirm = clients.some(
-    (client) => client.id === clientId,
+  const engagement = await getEngagementByIdForFirm(
+    engagementId,
+    user.firmId,
   );
 
-  if (!clientBelongsToFirm) {
+  if (!engagement) {
     return null;
   }
 
-  const engagements = await getEngagementsByClient(clientId);
-
-  const engagementBelongsToClient = engagements.some(
-    (engagement) => engagement.id === engagementId,
-  );
-
-  if (!engagementBelongsToClient) {
+  if (engagement.clientId !== clientId) {
     return null;
   }
 
-  return updateEngagement(engagementId, data);
+  return updateEngagementForFirm(
+    engagementId,
+    user.firmId,
+    data,
+  );
 }
+
 export async function deleteEngagementForUser(
   userId: string,
   clientId: string,
@@ -105,25 +99,21 @@ export async function deleteEngagementForUser(
     throw new Error("User not found");
   }
 
-  const clients = await getClientsByFirm(user.firmId);
-
-  const clientBelongsToFirm = clients.some(
-    (client) => client.id === clientId,
+  const engagement = await getEngagementByIdForFirm(
+    engagementId,
+    user.firmId,
   );
 
-  if (!clientBelongsToFirm) {
+  if (!engagement) {
     return null;
   }
 
-  const engagements = await getEngagementsByClient(clientId);
-
-  const engagementBelongsToClient = engagements.some(
-    (engagement) => engagement.id === engagementId,
-  );
-
-  if (!engagementBelongsToClient) {
+  if (engagement.clientId !== clientId) {
     return null;
   }
 
-  return deleteEngagement(engagementId);
+  return deleteEngagementForFirm(
+    engagementId,
+    user.firmId,
+  );
 }
