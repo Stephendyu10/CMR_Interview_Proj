@@ -40,7 +40,6 @@ router.get("/:clientId/engagements", async (req, res, next) => {
 });
 
 router.post("/:clientId/engagements", async (req, res, next) => {
-  try {
     const { clientId } = req.params;
 
     const result = createEngagementSchema.safeParse(req.body);
@@ -67,9 +66,6 @@ router.post("/:clientId/engagements", async (req, res, next) => {
     }
 
     return res.status(201).json(engagement);
-  } catch (error) {
-    next(error);
-  }
 });
 
 router.patch(

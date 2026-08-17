@@ -29,7 +29,7 @@ export async function createRequest(
   return request;
 }
 
-export async function getRequestsByEngagement(
+export async function getRequestsByEngagementForFirm(
   engagementId: string,
   firmId: string,
 ) {

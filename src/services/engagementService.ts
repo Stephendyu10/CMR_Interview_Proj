@@ -2,12 +2,12 @@ import { getUserById } from "../db/queries/users";
 import { getClientByIdForFirm } from "../db/queries/clients";
 
 import {
-  createEngagement,
-  getEngagementsByClientForFirm,
-  getEngagementByIdForFirm,
-  updateEngagementForFirm,
-  deleteEngagementForFirm,
-  type EngagementUpdate,
+    createEngagement,
+    getEngagementsByClientForFirm,
+    getEngagementByIdForFirm,
+    updateEngagementForFirm,
+    deleteEngagementForFirm,
+    type EngagementUpdate,
 } from "../db/queries/engagements";
 
 export async function createEngagementForUser(
@@ -44,16 +44,22 @@ export async function getEngagementsForUser(
   userId: string,
   clientId: string,
 ) {
-  const user = await getUserById(userId);
+    const user = await getUserById(userId);
 
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  return getEngagementsByClientForFirm(
-    clientId,
-    user.firmId,
-  );
+    if (!user) {
+        throw new Error("User not found");
+    }
+    const client = await getClientByIdForFirm(
+        clientId,
+        user.firmId,
+    );
+    if (!client){
+        return null;
+    }
+    return getEngagementsByClientForFirm(
+        clientId,
+        user.firmId,
+    );
 }
 
 export async function updateEngagementForUser(

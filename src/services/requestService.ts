@@ -3,11 +3,11 @@ import { getClientByIdForFirm } from "../db/queries/clients";
 import { getEngagementByIdForFirm } from "../db/queries/engagements";
 
 import {
-  createRequest,
-  getRequestsByEngagement,
-  getRequestByIdForFirm,
-  updateRequestForFirm,
-  deleteRequestForFirm,
+    createRequest,
+    getRequestsByEngagementForFirm,
+    getRequestByIdForFirm,
+    updateRequestForFirm,
+    deleteRequestForFirm,
 } from "../db/queries/requests";
 
 export async function createRequestForUser(
@@ -103,7 +103,7 @@ export async function getRequestsForUser(
     return null;
   }
 
-  return getRequestsByEngagement(
+  return getRequestsByEngagementForFirm(
     engagementId,
     user.firmId,
   );

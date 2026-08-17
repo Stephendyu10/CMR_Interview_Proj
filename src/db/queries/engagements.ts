@@ -29,15 +29,6 @@ export async function createEngagement(
   return engagement;
 }
 
-export async function getEngagementsByClient(
-  clientId: string,
-) {
-  return db
-    .select()
-    .from(engagements)
-    .where(eq(engagements.clientId, clientId));
-}
-
 export async function getEngagementsByClientForFirm(
   clientId: string,
   firmId: string,
