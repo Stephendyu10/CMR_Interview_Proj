@@ -40,6 +40,14 @@ export async function createTaskForUser(
     return null;
   }
 
+  if (assignedToUserId) {
+    const assignedUser = await getUserById(assignedToUserId);
+
+    if (!assignedUser || assignedUser.firmId !== user.firmId) {
+      return null;
+    }
+  }
+
   return createTask(
     user.firmId,
     clientId,
@@ -110,6 +118,14 @@ export async function updateTaskForUser(
 
   if (task.engagementId !== engagementId) {
     return null;
+  }
+
+  if (values.assignedToUserId) {
+    const assignedUser = await getUserById(values.assignedToUserId);
+
+    if (!assignedUser || assignedUser.firmId !== user.firmId) {
+      return null;
+    }
   }
 
   return updateTaskForFirm(
