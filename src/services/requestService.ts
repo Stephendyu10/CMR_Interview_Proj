@@ -202,3 +202,123 @@ export async function deleteRequestForUser(
     user.firmId,
   );
 }
+export async function getRequestForUser(
+  userId: string,
+  clientId: string,
+  engagementId: string,
+  requestId: string,
+) {
+  const user = await getUserById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const request = await getRequestByIdForFirm(
+    requestId,
+    user.firmId,
+  );
+
+  if (!request) {
+    return null;
+  }
+
+  if (request.clientId !== clientId) {
+    return null;
+  }
+
+  if (request.engagementId !== engagementId) {
+    return null;
+  }
+
+  return request;
+}
+
+export async function sendRequestForUser(
+  userId: string,
+  clientId: string,
+  engagementId: string,
+  requestId: string,
+) {
+  const user = await getUserById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const request = await getRequestByIdForFirm(
+    requestId,
+    user.firmId,
+  );
+
+  if (!request) {
+    return null;
+  }
+
+  if (request.clientId !== clientId) {
+    return null;
+  }
+
+  if (request.engagementId !== engagementId) {
+    return null;
+  }
+
+  if (request.status !== "DRAFT") {
+    throw new Error(
+      "Request can only be sent from DRAFT status",
+    );
+  }
+
+  return updateRequestForFirm(
+    requestId,
+    user.firmId,
+    {
+      status: "SENT",
+      sentAt: new Date(),
+    },
+  );
+}
+export async function completeRequestForUser(
+  userId: string,
+  clientId: string,
+  engagementId: string,
+  requestId: string,
+) {
+  const user = await getUserById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const request = await getRequestByIdForFirm(
+    requestId,
+    user.firmId,
+  );
+
+  if (!request) {
+    return null;
+  }
+
+  if (request.clientId !== clientId) {
+    return null;
+  }
+
+  if (request.engagementId !== engagementId) {
+    return null;
+  }
+
+  if (request.status !== "SENT") {
+    throw new Error(
+      "Request can only be completed from SENT status",
+    );
+  }
+
+  return updateRequestForFirm(
+    requestId,
+    user.firmId,
+    {
+      status: "COMPLETED",
+      completedAt: new Date(),
+    },
+  );
+}

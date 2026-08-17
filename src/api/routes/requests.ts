@@ -8,16 +8,49 @@ import {
 } from "../../validation/requestsSchema";
 
 import {
-  createRequestForUser,
-  getRequestsForUser,
-  updateRequestForUser,
-  deleteRequestForUser,
+    createRequestForUser,
+    getRequestsForUser,
+    getRequestForUser,
+    sendRequestForUser,
+    completeRequestForUser,
+    updateRequestForUser,
+    deleteRequestForUser,
 } from "../../services/requestService";
 
 const router = Router();
 
 router.use(requireUser);
 
+// GET /clients/:clientId/engagements/:engagementId/requests/:requestId
+router.get(
+  "/:clientId/engagements/:engagementId/requests/:requestId",
+  async (req, res, next) => {
+    try {
+      const {
+        clientId,
+        engagementId,
+        requestId,
+      } = req.params;
+
+      const request = await getRequestForUser(
+        req.user!.id,
+        clientId,
+        engagementId,
+        requestId,
+      );
+
+      if (!request) {
+        return res.status(404).json({
+          error: "Request not found",
+        });
+      }
+
+      return res.json(request);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 // GET /clients/:clientId/engagements/:engagementId/requests
 router.get(
   "/:clientId/engagements/:engagementId/requests",
@@ -152,6 +185,65 @@ router.delete(
         message: "Request deleted",
         request,
       });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.post(
+  "/:clientId/engagements/:engagementId/requests/:requestId/send",
+  async (req, res, next) => {
+    try {
+      const {
+        clientId,
+        engagementId,
+        requestId,
+      } = req.params;
+
+      const request = await sendRequestForUser(
+        req.user!.id,
+        clientId,
+        engagementId,
+        requestId,
+      );
+
+      if (!request) {
+        return res.status(404).json({
+          error: "Request not found",
+        });
+      }
+
+      return res.json(request);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+router.post(
+  "/:clientId/engagements/:engagementId/requests/:requestId/complete",
+  async (req, res, next) => {
+    try {
+      const {
+        clientId,
+        engagementId,
+        requestId,
+      } = req.params;
+
+      const request = await completeRequestForUser(
+        req.user!.id,
+        clientId,
+        engagementId,
+        requestId,
+      );
+
+      if (!request) {
+        return res.status(404).json({
+          error: "Request not found",
+        });
+      }
+
+      return res.json(request);
     } catch (error) {
       next(error);
     }

@@ -17,7 +17,6 @@ export const createRequestSchema = z.object({
 export const updateRequestSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().nullable().optional(),
-  status: requestStatusEnum.optional(),
   assignedToUserId: z.string().uuid().nullable().optional(),
   dueDate: z.string().nullable().optional(),
 });
