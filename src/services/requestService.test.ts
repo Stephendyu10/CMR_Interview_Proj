@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  completeRequestForUser,
-  sendRequestForUser,
+    completeRequestForUser,
+    deleteRequestForUser,
+    getRequestForUser,
+    updateRequestForUser,
+    sendRequestForUser,
 } from "./requestService";
 
 import { getUserById } from "../db/queries/users";
@@ -272,4 +275,110 @@ describe("request workflow", () => {
       ).not.toHaveBeenCalled();
     });
   });
+    describe("tenant isolation", () => {
+    it("does not get a request from another firm's tenant", async () => {
+        mockedGetRequestByIdForFirm.mockResolvedValue(null as unknown as Awaited<
+        ReturnType<typeof getRequestByIdForFirm>
+        >);
+
+        const result = await getRequestForUser(
+        "user-a",
+        "client-a",
+        "engagement-a",
+        "request-from-firm-b",
+        );
+
+        expect(result).toBeNull();
+
+        expect(mockedGetRequestByIdForFirm).toHaveBeenCalledWith(
+        "request-from-firm-b",
+        "firm-a",
+        );
+    });
+
+    it("does not update a request from another firm's tenant", async () => {
+        mockedGetRequestByIdForFirm.mockResolvedValue(null as unknown as Awaited<
+        ReturnType<typeof getRequestByIdForFirm>
+        >);
+
+        const result = await updateRequestForUser(
+        "user-a",
+        "client-a",
+        "engagement-a",
+        "request-from-firm-b",
+        {
+            title: "Attempted cross-firm update",
+        },
+        );
+
+        expect(result).toBeNull();
+
+        expect(mockedGetRequestByIdForFirm).toHaveBeenCalledWith(
+        "request-from-firm-b",
+        "firm-a",
+        );
+
+        expect(mockedUpdateRequestForFirm).not.toHaveBeenCalled();
+    });
+
+    it("does not delete a request from another firm's tenant", async () => {
+        mockedGetRequestByIdForFirm.mockResolvedValue(null as unknown as Awaited<
+        ReturnType<typeof getRequestByIdForFirm>
+        >);
+
+        const result = await deleteRequestForUser(
+        "user-a",
+        "client-a",
+        "engagement-a",
+        "request-from-firm-b",
+        );
+
+        expect(result).toBeNull();
+
+        expect(mockedGetRequestByIdForFirm).toHaveBeenCalledWith(
+        "request-from-firm-b",
+        "firm-a",
+        );
+    });
+
+    it("does not assign a request to a user from another firm", async () => {
+        const otherFirmUser = {
+        ...user,
+        id: "user-b",
+        firmId: "firm-b",
+        name: "User B",
+        email: "userb@test.com",
+        };
+
+        mockedGetRequestByIdForFirm.mockResolvedValue(request);
+
+        mockedGetUserById
+        .mockResolvedValueOnce(user)
+        .mockResolvedValueOnce(otherFirmUser);
+
+        const result = await updateRequestForUser(
+        "user-a",
+        "client-a",
+        "engagement-a",
+        "request-a",
+        {
+            assignedToUserId: "user-b",
+        },
+        );
+
+        expect(result).toBeNull();
+
+        expect(mockedGetRequestByIdForFirm).toHaveBeenCalledWith(
+        "request-a",
+        "firm-a",
+        );
+
+        expect(mockedGetUserById).toHaveBeenNthCalledWith(
+        2,
+        "user-b",
+        );
+
+        expect(mockedUpdateRequestForFirm).not.toHaveBeenCalled();
+    });
+    });
 });
